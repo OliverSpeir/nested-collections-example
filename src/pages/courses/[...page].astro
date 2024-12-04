@@ -1,0 +1,93 @@
+---
+import { readableDate } from "@utils";
+import type { GetStaticPaths } from "astro";
+import { getCollection } from "astro:content";
+import Layout from "@layouts/DefaultPage.astro";
+import { Picture } from "astro:assets";
+
+export const getStaticPaths = (async ({ paginate }) => {
+	const course1Lessons = await getCollection("course1");
+	const course2Lessons = await getCollection("course2");
+
+	const groupedLessons = [];
+	const maxLength = Math.max(course1Lessons.length, course2Lessons.length);
+
+	for (let i = 0; i < maxLength; i++) {
+		if (course1Lessons.length) groupedLessons.push(course1Lessons.splice(0, 2));
+		if (course2Lessons.length) groupedLessons.push(course2Lessons.splice(0, 2));
+	}
+
+	return paginate(groupedLessons.flat(), { pageSize: 4 });
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+
+const description = "Courses etc";
+const title = "Courses";
+
+const course1Lessons = page.data.filter((post) => post.collection === "course1");
+const course2Lessons = page.data.filter((post) => post.collection === "course2");
+---
+
+<Layout {title} {description}>
+	<h1>Courses</h1>
+	<ul>
+		<li>
+			<a href="/courses/course1">Course1</a>
+		</li>
+		<li>
+			<a href="/courses/course2">Course2</a>
+		</li>
+	</ul>
+
+	<h2>Course 1 Lessons</h2>
+	{
+		course1Lessons.map((post) => (
+			<section>
+				<div class="max-w-md border-solid">
+					<a href={`/courses/${String(post.collection)}/${String(post.id)}/`} class="flex flex-col">
+						<Picture
+							src={post.data.ogImage}
+							alt={post.data.ogImageAlt}
+							formats={["avif", "webp"]}
+							densities={[1, 2]}
+							width="600"
+							loading="eager"
+						/>
+						<span>{post.data.title}</span>
+						<time datetime={readableDate(post.data.date)}>{readableDate(post.data.date)}</time>
+						<p>{post.data.description}</p>
+					</a>
+				</div>
+			</section>
+		))
+	}
+
+	<h3>Course 2 Lessons</h3>
+	{
+		course2Lessons.map((post) => (
+			<section>
+				<div class="max-w-md border-solid">
+					<a href={`/courses/${String(post.collection)}/${String(post.id)}/`} class="flex flex-col">
+						<Picture
+							src={post.data.ogImage}
+							alt={post.data.ogImageAlt}
+							formats={["avif", "webp"]}
+							densities={[1, 2]}
+							width="600"
+							loading="eager"
+						/>
+						<span>{post.data.title}</span>
+						<time datetime={readableDate(post.data.date)}>{readableDate(post.data.date)}</time>
+						<p>{post.data.description}</p>
+					</a>
+				</div>
+			</section>
+		))
+	}
+
+	<div>
+		{page.url.prev && <a href={page.url.prev}>Prev Page</a>}
+		{page.url.next && <a href={page.url.next}>Next Page</a>}
+	</div>
+</Layout>

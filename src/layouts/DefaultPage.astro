@@ -11,7 +11,7 @@ import ThemeToggleButton from "@components/ThemeToggleButton.astro";
 type Props = {
 	title: string;
 	description: string;
-	post?: CollectionEntry<"blog"> | undefined;
+	post?: CollectionEntry<"course1"> | CollectionEntry<"course2"> | undefined;
 	ogImage?: ImageMetadata;
 };
 

@@ -6,13 +6,12 @@ type Props = {
 	title: string;
 	description: string;
 	ogImage?: ImageMetadata | undefined;
-	post: CollectionEntry<"blog"> | undefined;
+	post: CollectionEntry<"course1"> | CollectionEntry<"course2"> | undefined;
 };
 
 const defaultOg = "/social-preview.png";
 const { title, description, ogImage, post } = Astro.props;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
-console.log(ogImage);
 ---
 
 <title>{title}</title>
@@ -74,10 +73,6 @@ console.log(ogImage);
 			<meta property="article:published_time" content={post.data.date.toISOString()} />
 			<meta property="article:author" content="blogger" />
 			<meta property="article:section" content="blog" />
-
-			{post.data.tags.map((tag: string) => (
-				<meta property="article:tag" content={tag} />
-			))}
 		</>
 	)
 }
