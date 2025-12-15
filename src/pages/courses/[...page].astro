@@ -1,0 +1,99 @@
+---
+import type { GetStaticPaths } from "astro";
+import { getCollection } from "astro:content";
+import Layout from "../../layouts/DefaultPage.astro";
+
+export const getStaticPaths = (async ({ paginate }) => {
+  const lessonSorter = new Intl.Collator(undefined, { numeric: true });
+
+  const course1Lessons = (await getCollection("course1")).sort((a, b) =>
+    lessonSorter.compare(a.id, b.id)
+  );
+  const course2Lessons = (await getCollection("course2")).sort((a, b) =>
+    lessonSorter.compare(a.id, b.id)
+  );
+
+  const maxPairs = Math.max(
+    Math.ceil(course1Lessons.length / 2),
+    Math.ceil(course2Lessons.length / 2),
+  );
+
+  const groupedLessons = [];
+  for (let i = 0; i < maxPairs; i++) {
+    groupedLessons.push(
+      ...course1Lessons.slice(i * 2, i * 2 + 2),
+      ...course2Lessons.slice(i * 2, i * 2 + 2),
+    );
+  }
+
+  return paginate(groupedLessons, { pageSize: 4 });
+}) satisfies GetStaticPaths;
+
+const { page } = Astro.props;
+
+const description = "Courses etc";
+const title = "Courses";
+
+const course1Lessons = page.data.filter((post) =>
+  post.collection === "course1"
+);
+const course2Lessons = page.data.filter((post) =>
+  post.collection === "course2"
+);
+---
+
+<Layout {title} {description}>
+  <h1>Courses</h1>
+  <ul>
+    <li>
+      <a href="/courses/course1">Course1</a>
+    </li>
+    <li>
+      <a href="/courses/course2">Course2</a>
+    </li>
+  </ul>
+
+  <h2>Course 1 Lessons</h2>
+  {
+    course1Lessons.map((post) => (
+      <section>
+        <a href={`/courses/${String(post.collection)}/${String(post.id)}/`}>
+          <span>{post.data.title}</span>
+          <time datetime={post.data.date.toISOString()}>{
+            post.data.date.toLocaleDateString("en-US")
+          }</time>
+          <p>{post.data.description}</p>
+        </a>
+      </section>
+    ))
+  }
+
+  <h3>Course 2 Lessons</h3>
+  {
+    course2Lessons.map((post) => (
+      <section>
+        <a href={`/courses/${String(post.collection)}/${String(post.id)}/`}>
+          <span>{post.data.title}</span>
+          <time datetime={post.data.date.toISOString()}>{
+            post.data.date.toLocaleDateString("en-US")
+          }</time>
+          <p>{post.data.description}</p>
+        </a>
+      </section>
+    ))
+  }
+
+  <footer>
+    {page.url.prev && <a href={page.url.prev}>Prev Page</a>}
+    {page.url.next && <a href={page.url.next}>Next Page</a>}
+  </footer>
+
+  <style>
+    section {
+      border: 1px solid black;
+      margin-bottom: 10px;
+      padding: 5px;
+      max-width: 400px;
+    }
+  </style>
+</Layout>

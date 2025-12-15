@@ -1,0 +1,29 @@
+---
+import { getCollection, render } from "astro:content";
+import Layout from "../../../layouts/DefaultPage.astro";
+
+export const getStaticPaths = async () => {
+  const course1Lessons = await getCollection("course1");
+  const course2Lessons = await getCollection("course2");
+  const allLessons = [...course1Lessons, ...course2Lessons];
+
+  return allLessons.map((post) => ({
+    params: { slug: post.id, course: post.collection },
+    props: { post },
+  }));
+};
+
+const { post } = Astro.props;
+
+const {
+  data: { title, description },
+} = post;
+
+const { Content } = await render(post);
+---
+
+<Layout {title} {description}>
+  <article>
+    <Content />
+  </article>
+</Layout>

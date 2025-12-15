@@ -1,0 +1,37 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../../layouts/DefaultPage.astro";
+
+export const getStaticPaths = async () => {
+  const course1Posts = await getCollection("course1");
+  const course2Posts = await getCollection("course2");
+  const allPosts = [...course1Posts, ...course2Posts];
+
+  return allPosts.map((post) => ({
+    params: { course: post.collection },
+  }));
+};
+
+const { course } = Astro.params;
+const lessons = await getCollection(course);
+const description = `Lessons in ${String(course)}`;
+const title = String(course);
+---
+
+<Layout {description} {title}>
+  <h1>Lessons in {course}</h1>
+  <ul>
+    {
+      lessons.map((lesson) => (
+        <li>
+          <a href={`/courses/${String(course)}/${String(lesson.id)}/`}>{
+            lesson.data.title
+          }</a>
+        </li>
+      ))
+    }
+  </ul>
+  <footer>
+    <a href="/courses"> Courses Home </a>
+  </footer>
+</Layout>
